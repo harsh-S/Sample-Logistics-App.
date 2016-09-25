@@ -36,6 +36,8 @@ app.get('/api/shipments/', function(req, res) {
 			vendorSummary[key] = new shipmentUtils.Summary(0,0)
 		})
 
+		var offset = parseInt(req.query.offset), limit = parseInt(req.query.limit)
+
 		lines.forEach(function(line, idx) {
 			var arr = line.split(','),
 				shipment = new shipmentUtils.shipment(arr[0], arr[1], null, arr[2], arr[3], arr[4], arr[5], arr[6], arr[7])
@@ -52,7 +54,7 @@ app.get('/api/shipments/', function(req, res) {
 				clientSummary[shipment.client_id].num_of_shipments_delivered++
 			} else if(clientSummary[shipment.client_id] === undefined) clientSummary[shipment.client_id] = new shipmentUtils.Summary(0,0)
 			
-			if((idx >= req.query.offset) && (idx < (req.query.offset + req.query.limit))) shipments.push(shipment)
+			if((idx >= offset) && (idx < (offset + limit))) shipments.push(shipment)
 		})
 
 		// TODO: Pagination for clientSummary, possibly sort clientSummary, vendorSummary ?
@@ -61,6 +63,7 @@ app.get('/api/shipments/', function(req, res) {
 			vendorSummary: vendorSummary,
 			clientSummary: clientSummary,
 			shipments: shipments,
+			total_shipments: lines.length,
 			success: true
 		})
 	})
