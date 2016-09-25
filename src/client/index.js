@@ -1,183 +1,115 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
-import { Button, Form, FormGroup, FormControl, ControlLabel, Col } from 'react-bootstrap'
-import { hour_12_regex, minute_regex, latlng_regex, email_regex } from './constants.js'
-import { addReminder, fetchAPIcallLogs } from './network.js'
+import { Button, Table } from 'react-bootstrap'
+import { statuses, weight_units, payment_types, zones, defaultLimit } from './constants.js'
+import { fetchShipments } from './network.js'
 
-class LatLng {
-	constructor(lat=0, lng=0){
-		this.lat = lat
-		this.lng = lng
-	}
-}
-
-class Reminder {
-	constructor(source=new LatLng(), destination=new LatLng(), time=new Date(), email=''){
-		this.source = source
-		this.destination = destination
-		this.time = time
-		this.email = email
-		this.travel_time = -1 // in minutes
-		this.uber_arrival_time = -1 // in minutes
-		this.mailSent = false
-	}
-}
-
-class AddReminder extends Component {
+class Invoices extends Component {
 	constructor(props){
 		super(props)
 		this.state = {
-			source: '',
-			destination: '',
-			time: '',
-			email: ''
+			shipments: [],
+			clientSummary: {},
+			vendorSummary: {},
+			offset: 0,
+			limit: defaultLimit
 		}
-		this.getValidationState = this.getValidationState.bind(this)
-		this.handleChange = this.handleChange.bind(this)
-	}
-	getValidationState(key){
-		const _state = this.state
-		switch(key){
-			case 'source':
-			case 'destination':
-				if(latlng_regex.test(_state[key])) return "success"
-				else return "error"
-				break
-			case 'time':
-				let arr = _state.time.split(':')
-				if(hour_12_regex.test(arr[0]) && minute_regex.test(arr[1])) return "success"
-				else return "error"
-				break
-			case 'email':
-				if(email_regex.test(_state.email)) return "success"
-				else return "error"
-				break
-			default:
-				break
-		}
-	}
-	handleChange(key, event){
-		this.state[key] = event.target.value
-		this.setState(this.state)
-	}
-	render(){
-		const leftCols = 4, rightCols = 2, _props = this.props, _state = this.state
-		return(
-			<Form horizontal onSubmit={_props.remind.bind(null, _state.source, _state.destination, _state.time, _state.email)}>
-			  <FormGroup validationState={this.getValidationState('source')}>
-			  	<Col componentClass={ControlLabel} sm={leftCols}>
-			  	  Source
-			  	</Col>
-			  	<Col sm={rightCols}>
-			  	  <FormControl
-		            type="text"
-		            value={_state.source}
-		            placeholder="Enter Lat, Long"
-		            onChange={this.handleChange.bind(this, 'source')}
-		          />
-			  	</Col>
-			  </FormGroup>
-			  <FormGroup validationState={this.getValidationState('destination')}>
-			  	<Col componentClass={ControlLabel} sm={leftCols}>
-			  	  Destination
-			  	</Col>
-			  	<Col sm={rightCols}>
-			  	  <FormControl
-		            type="text"
-		            value={_state.destination}
-		            placeholder="Enter Lat, Long"
-		            onChange={this.handleChange.bind(this, 'destination')}
-		          />
-			  	</Col>
-			  </FormGroup>
-			  <FormGroup validationState={this.getValidationState('time')}>
-			    <Col componentClass={ControlLabel} sm={leftCols}>
-			  	  Time
-			  	</Col>
-			  	<Col sm={rightCols}>
-			  	  <FormControl
-		            type="text"
-		            value={_state.time}
-		            placeholder="HH:MM"
-		            onChange={this.handleChange.bind(this, 'time')}
-		          />
-			  	</Col>
-			  </FormGroup>
-			  <FormGroup validationState={this.getValidationState('email')}>
-			    <Col componentClass={ControlLabel} sm={leftCols}>
-			  	  Email
-			  	</Col>
-			  	<Col sm={rightCols}>
-			  	  <FormControl
-		            type="text"
-		            value={_state.email}
-		            placeholder="Email"
-		            onChange={this.handleChange.bind(this, 'email')}
-		          />
-			  	</Col>
-			  </FormGroup>
-			  <FormGroup>
-			  	<Col smOffset={leftCols} sm={rightCols}>
-			  	  <Button type="submit">REMIND ME</Button>
-			  	</Col>
-			  </FormGroup>
-			</Form>
-		)
-	}
-}
-
-class ReminderLogs extends Component{
-	constructor(props){
-		super(props)
-		this.state = {
-			apiCallLogs: []
-		}
-		this.remind = this.remind.bind(this)
-		this.fetchLogs = this.fetchLogs.bind(this)
-	}
-	fetchLogs(){
-		fetchAPIcallLogs(jqXHR => {
-			this.setState({apiCallLogs: jqXHR.apiCallLogs})
-		}, jqXHR => alert('Error fetching api call logs'))
+		this.refresh = this.refresh.bind(this)
 	}
 	componentDidMount(){
-		this.fetchLogs()
+		this.refresh()
 	}
-	remind(source, destination, time, email, event){
-		if(event) event.preventDefault()
-
-		let timeObj = new Date() // assume date is today
-
-		time = time.split(':').map(Number)
-		timeObj.setHours(time[0])
-		timeObj.setMinutes(time[1])
-
-		source = source.split(',').map(Number)
-		destination = destination.split(',').map(Number)
-		
-		addReminder(new Reminder(new LatLng(source[0], source[1]), 
-								 new LatLng(destination[0], destination[1]), 
-								 timeObj, email), 
-		jqXHR => {
-			this.fetchLogs()
-			alert("Reminder added !")
-		}, jqXHR => {
-			console.log("error", jqXHR)
-			alert("error adding reminder")
-		})
+	refresh(){
+		const _state = this.state
+		fetchShipments(_state.offset, _state.limit, jqXHR => {
+			this.setState({
+				shipments: jqXHR.shipments, 
+				clientSummary: jqXHR.clientSummary, 
+				vendorSummary: jqXHR.vendorSummary})
+		}, jqXHR => alert('Some error occured'))
 	}
 	render(){
 		const _state = this.state
 		return(
-		  <div>
-		  	<AddReminder remind={this.remind}/>
-		  	<br/><hr/><br/>
-		  	<Button bsStyle="primary" onClick={this.fetchLogs}>Refresh</Button>
-		  	{_state.apiCallLogs.map(log => 
-		  		<p>{"["+log.time.toString()+"] "+log.api+" API queried for user with email: "+log.email}</p>)}
-		  </div>
+			<div>
+				<Button onClick={this.refresh}>Refresh</Button>
+				{/*Per Vendor Summary Table*/}
+				<Table striped bordered condensed hover>
+					<thead>
+						<tr>
+							<th>Vendor ID</th>
+							<th>Total Amount Charged</th>
+							<th>Number of Orders Delivered/Returned</th>
+						</tr>
+						<tbody>
+							{Object.keys(_state.vendorSummary).map(key =>
+							<tr key={key}>
+								<td>{key}</td>
+								<td>{_state.vendorSummary[key].total_amount_charged}</td>
+								<td>{_state.vendorSummary[key].num_of_shipments_delivered}</td>
+							</tr>)}
+						</tbody>
+					</thead>
+				</Table>
+				{/*Per Client Summary Table without pagination; TODO: add pagination*/}
+				<Table striped bordered condensed hover>
+					<thead>
+						<tr>
+							<th>Client ID</th>
+							<th>Total Amount Charged</th>
+							<th>Number of Orders Delivered/Returned</th>
+						</tr>
+						<tbody>
+							{Object.keys(_state.clientSummary).map(key =>
+							<tr key={key}>
+								<td>{key}</td>
+								<td>{_state.clientSummary[key].total_amount_charged}</td>
+								<td>{_state.clientSummary[key].num_of_shipments_delivered}</td>
+							</tr>)}
+						</tbody>
+					</thead>
+				</Table>
+				{/*Shipments table with pagination*/}
+				<Table striped bordered condensed hover>
+					<thead>
+						<tr>
+							<th>Shipment ID</th>
+							<th>Weight</th>
+							<th>Payment Type</th>
+							<th>Order Value</th>
+							<th>Origin Pincode</th>
+							<th>Destination Pincode</th>
+							<th>Client ID</th>
+							<th>Status</th>
+							<th>Vendor</th>
+							<th>Zone</th>
+							<th>Client Price</th>
+							<th>Vendor Price</th>
+							<th>Net Profit/Loss</th>
+						</tr>
+					</thead>
+					<tbody>
+						{_state.shipments.map(shipment =>
+						<tr key={shipment.shipment_id}>
+							<td>{shipment.shipment_id}</td>
+							<td>{shipment.weight + ' ' + weight_units[parseInt(shipment.weight_unit)]}</td>
+							<td>{payment_types[parseInt(shipment.payment_type)]}</td>
+							<td>{shipment.order_value}</td>
+							<td>{shipment.origin_pincode}</td>
+							<td>{shipment.destination_pincode}</td>
+							<td>{shipment.client_id}</td>
+							<td>{statuses[parseInt(shipment.status)]}</td>
+							<td>{vendors[parseInt(shipment.vendor)]}</td>
+							<td>{zones[parseInt(shipment.zone)]}</td>
+							<td>{shipment.client_price}</td>
+							<td>{shipment.vendor_price}</td>
+							<td>{shipment.client_price - shipment.vendor_price}</td>
+						</tr>)}
+					</tbody>
+				</Table>
+			</div>
 		)
 	}
 }
 
-ReactDOM.render(<ReminderLogs />,document.getElementById('root'))
+ReactDOM.render(<Invoices />,document.getElementById('root'))
