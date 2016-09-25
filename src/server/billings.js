@@ -1,3 +1,5 @@
+var constants = require('./constants')
+
 function Freight(first_500, addl_500, return_500){
 	this.first_500 = first_500
 	this.addl_500 = addl_500
@@ -20,11 +22,11 @@ function CodSlab(baseCharge, percentageCharge){
 
 function BillingsSlab(fuelSurcharge, codBaseCharge, codPercentageCharge, zoneSlab){
 	this.billingUnitWeight = 500
-	this.billingBaseUnit = WEIGHT_UNIT_GRAM
+	this.billingBaseUnit = 'gm'
 	this.minimumBillingUnits = 1
 	this.fuelSurcharge = fuelSurcharge
 	this.slab = { zones: zoneSlab }
-	this.codSlab = new codSlab(codBaseCharge, codPercentageCharge)
+	this.codSlab = new CodSlab(codBaseCharge, codPercentageCharge)
 }
 
 module.exports = {

@@ -9,7 +9,7 @@ function getKey(obj, value){
 }
 
 function convert_to_grams(value, from_unit){
-	switch(from_unit){
+	switch(parseInt(from_unit)){
 		case constants.WEIGHT_UNIT_KILOGRAM:
 			return value * 1000
 		case constants.WEIGHT_UNIT_GRAM:
@@ -20,7 +20,7 @@ function convert_to_grams(value, from_unit){
 }
 
 function convert_to_kilograms(value, from_unit){
-	switch(from_unit){
+	switch(parseInt(from_unit)){
 		case constants.WEIGHT_UNIT_GRAM:
 			return value / 1000
 		case constants.WEIGHT_UNIT_KILOGRAM:
@@ -31,7 +31,7 @@ function convert_to_kilograms(value, from_unit){
 }
 
 function convert_weight(value, from_unit, to_unit){
-	switch(to_unit){
+	switch(parseInt(getKey(constants.weight_units, to_unit))){
 		case constants.WEIGHT_UNIT_GRAM:
 			return convert_to_grams(value, from_unit)
 		case constants.WEIGHT_UNIT_KILOGRAM:

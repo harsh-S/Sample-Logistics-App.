@@ -7,10 +7,10 @@ var app = require('express')(),
 	apiCallLogs = [],
 	intervalObj = {}
 
-app.use(bodyParser.json())   	    // to support JSON-encoded bodies
+/*app.use(bodyParser.json())   	    // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
-}))
+}))*/
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', "*");
@@ -21,7 +21,7 @@ var allowCrossDomain = function(req, res, next) {
 
 app.use(allowCrossDomain)
 
-app.post('/fetchShipments', function(req, res) {
+app.get('/api/shipments/', function(req, res) {
 	fs.readFile(constants.filePath, function(err, data){
 		if(err) {
 			// TODO: use logger
@@ -29,7 +29,7 @@ app.post('/fetchShipments', function(req, res) {
 			return
 		}
 
-		var lines = data.split('\n').slice(1),
+		var lines = data.toString().split('\n').slice(1),
 			vendorSummary = {}, clientSummary = {}, shipments = []
 	
 		Object.keys(constants.vendors).forEach(function(key){
@@ -38,14 +38,11 @@ app.post('/fetchShipments', function(req, res) {
 
 		lines.forEach(function(line, idx) {
 			var arr = line.split(','),
-				shipment = new shipmentUtils.shipment(arr[0], arr[1], null, arr[2], arr[3], arr[4], arr[5], arr[6], arr[7]),
-				vendor_price = 0, client_price = 0
-			
-			if([constants.STATUS_DELIVERED, constants.STATUS_RETURNED].indexOf(shipment.status) !== -1){
-				vendor_price = shipmentUtils.calculateShipmentPrice(shipment, constants.vendors[shipment.vendor].billingSlab)
-				client_price = shipmentUtils.calculateShipmentPrice(shipment, constants.clientRates.billingSlab)
+				shipment = new shipmentUtils.shipment(arr[0], arr[1], null, arr[2], arr[3], arr[4], arr[5], arr[6], arr[7])
 
-				// Summary calculated only for DELIVERED or RETURNED shipments
+			if([constants.STATUS_DELIVERED, constants.STATUS_RETURNED].indexOf(shipment.status) !== -1){
+				shipment.vendor_price = shipmentUtils.calculateShipmentPrice(shipment, constants.vendors[shipment.vendor].billingSlab)
+				shipment.client_price = shipmentUtils.calculateShipmentPrice(shipment, constants.clientRates.billingSlab)
 
 				vendorSummary[shipment.vendor].total_amount_charged += shipment.vendor_price
 				vendorSummary[shipment.vendor].num_of_shipments_delivered++
@@ -53,9 +50,9 @@ app.post('/fetchShipments', function(req, res) {
 				if(clientSummary[shipment.client_id] === undefined) clientSummary[shipment.client_id] = new shipmentUtils.Summary(0,0)
 				clientSummary[shipment.client_id].total_amount_charged += shipment.client_price
 				clientSummary[shipment.client_id].num_of_shipments_delivered++
-			}
+			} else if(clientSummary[shipment.client_id] === undefined) clientSummary[shipment.client_id] = new shipmentUtils.Summary(0,0)
 			
-			if((idx >= offset) && (idx < (offset + limit))) shipments.push(shipment)
+			if((idx >= req.query.offset) && (idx < (req.query.offset + req.query.limit))) shipments.push(shipment)
 		})
 
 		// TODO: Pagination for clientSummary, possibly sort clientSummary, vendorSummary ?

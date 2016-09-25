@@ -66,7 +66,7 @@ var vendors = (function(){
 	var dict = {}
 	// Can add additional info about vendors here
 	dict[VENDOR_1] = {
-		billingSlab: new billings.BillingsSlab(0.40, 40, 1.8, new billings.ZoneSlab([25,15,15],[30,20,20],[35,25,30],[40,30,35],[45,35,,40]))
+		billingSlab: new billings.BillingsSlab(0.40, 40, 1.8, new billings.ZoneSlab([25,15,15],[30,20,20],[35,25,30],[40,30,35],[45,35,40]))
 	}
 	dict[VENDOR_2] = {
 		billingSlab: new billings.BillingsSlab(0.45, 42, 1.8, new billings.ZoneSlab([30,30,30],[32,32,32],[40,40,40],[45,45,45],[48,48,48]))
@@ -75,8 +75,9 @@ var vendors = (function(){
 		billingSlab: new billings.BillingsSlab(0.25, 41.5, 0, new billings.ZoneSlab([40,40,20],[40,40,30],[40,40,40],[40,40,50],[40,40,60]))
 	}
 	dict[VENDOR_4] = {
-		billingSlab: new billings.BillingsSlab(0.20, 45, 2.0, new billings.billings.ZoneSlab([25,22,0],[25,22,0],[40,35,0],[40,35,0],[40,35,0]))
+		billingSlab: new billings.BillingsSlab(0.20, 45, 2.0, new billings.ZoneSlab([25,22,0],[25,22,0],[40,35,0],[40,35,0],[40,35,0]))
 	}
+	return dict
 })()
 
 var clientRates = {

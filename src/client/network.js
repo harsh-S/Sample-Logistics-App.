@@ -2,10 +2,10 @@ import { BASE_URL } from './constants.js'
 
 export function fetchShipments(offset, limit, successCallback, errorCallback){
 	$.ajax({
-		method: 'POST',
+		method: 'GET',
 		headers: {'Content-Type': 'application/json'},
-		url: BASE_URL + 'fetchShipments/',
-		data: JSON.stringify({offset: offset, limit: limit}),
+		url: BASE_URL + 'api/shipments/',
+		data: {offset: offset, limit: limit},
 		success: successCallback,
 		error: errorCallback
 	})

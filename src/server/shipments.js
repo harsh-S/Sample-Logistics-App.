@@ -34,7 +34,7 @@ function calculateShipmentPrice(shipment, billingSlab){
 	codCharge = (codCharge > billingSlab.codSlab.baseCharge) ? codCharge : billingSlab.codSlab.baseCharge
 
 	fuelSurcharge = freight * billingSlab.fuelSurcharge
-
+	console.log(freight, codCharge, fuelSurcharge)
 	return freight + codCharge + fuelSurcharge
 }
 

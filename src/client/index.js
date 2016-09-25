@@ -36,38 +36,34 @@ class Invoices extends Component {
 				{/*Per Vendor Summary Table*/}
 				<Table striped bordered condensed hover>
 					<thead>
-						<tr>
-							<th>Vendor ID</th>
-							<th>Total Amount Charged</th>
-							<th>Number of Orders Delivered/Returned</th>
-						</tr>
-						<tbody>
-							{Object.keys(_state.vendorSummary).map(key =>
-							<tr key={key}>
-								<td>{key}</td>
-								<td>{_state.vendorSummary[key].total_amount_charged}</td>
-								<td>{_state.vendorSummary[key].num_of_shipments_delivered}</td>
-							</tr>)}
-						</tbody>
+						<th>Vendor ID</th>
+						<th>Total Amount Charged</th>
+						<th>Number of Orders Delivered/Returned</th>
 					</thead>
+					<tbody>
+						{Object.keys(_state.vendorSummary).map(key =>
+						<tr key={key}>
+							<td>{key}</td>
+							<td>{_state.vendorSummary[key].total_amount_charged}</td>
+							<td>{_state.vendorSummary[key].num_of_shipments_delivered}</td>
+						</tr>)}
+					</tbody>
 				</Table>
 				{/*Per Client Summary Table without pagination; TODO: add pagination*/}
 				<Table striped bordered condensed hover>
 					<thead>
-						<tr>
-							<th>Client ID</th>
-							<th>Total Amount Charged</th>
-							<th>Number of Orders Delivered/Returned</th>
-						</tr>
-						<tbody>
-							{Object.keys(_state.clientSummary).map(key =>
-							<tr key={key}>
-								<td>{key}</td>
-								<td>{_state.clientSummary[key].total_amount_charged}</td>
-								<td>{_state.clientSummary[key].num_of_shipments_delivered}</td>
-							</tr>)}
-						</tbody>
+						<th>Client ID</th>
+						<th>Total Amount Charged</th>
+						<th>Number of Orders Delivered/Returned</th>
 					</thead>
+					<tbody>
+						{Object.keys(_state.clientSummary).map(key =>
+						<tr key={key}>
+							<td>{key}</td>
+							<td>{_state.clientSummary[key].total_amount_charged}</td>
+							<td>{_state.clientSummary[key].num_of_shipments_delivered}</td>
+						</tr>)}
+					</tbody>
 				</Table>
 				{/*Shipments table with pagination*/}
 				<Table striped bordered condensed hover>
@@ -99,7 +95,7 @@ class Invoices extends Component {
 							<td>{shipment.destination_pincode}</td>
 							<td>{shipment.client_id}</td>
 							<td>{statuses[parseInt(shipment.status)]}</td>
-							<td>{vendors[parseInt(shipment.vendor)]}</td>
+							<td>{shipment.vendor}</td>
 							<td>{zones[parseInt(shipment.zone)]}</td>
 							<td>{shipment.client_price}</td>
 							<td>{shipment.vendor_price}</td>
